@@ -16,6 +16,8 @@ use Doctrine\Tests\Models\DDC1872\DDC1872ExampleEntityWithOverride;
 use Doctrine\Tests\Models\DirectoryTree\Directory;
 use Doctrine\Tests\Models\DirectoryTree\File;
 use Doctrine\Tests\Models\ECommerce\ECommerceCart;
+use Doctrine\Tests\Models\SOOverrideAssocSuperclassIssue\PrivateSuperclassExample;
+use Doctrine\Tests\Models\SOOverrideAssocSuperclassIssue\ProtectedSuperclassExample;
 
 class AnnotationDriverTest extends AbstractMappingDriverTest
 {
@@ -254,6 +256,23 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
         $this->assertEquals('foo_overridden', $metadataWithOverride->fieldMappings['foo']['columnName']);
         $this->assertArrayHasKey('example_trait_bar_id', $metadataWithoutOverride->associationMappings['bar']['joinColumnFieldNames']);
         $this->assertArrayHasKey('example_entity_overridden_bar_id', $metadataWithOverride->associationMappings['bar']['joinColumnFieldNames']);
+    }
+
+    public function testCanOverrideMetadataInSuperclass()
+    {
+        $factory = $this->createClassMetadataFactory();
+
+        $classMetadata = $factory->getMetadataFor(PrivateSuperclassExample::class);
+        $this->assertEquals(
+            'superclass_target_entity_id',
+                $classMetadata->associationMappings['targetEntity']['joinColumns'][0]['name']
+        );
+
+        $classMetadata = $factory->getMetadataFor(ProtectedSuperclassExample::class);
+        $this->assertEquals(
+            'superclass_target_entity_id',
+            $classMetadata->associationMappings['targetEntity']['joinColumns'][0]['name']
+        );
     }
 }
 
